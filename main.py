@@ -15,10 +15,10 @@ load_dotenv()
 
 
 BANNER = """
-╔══════════════════════════════════════════════════════╗
-║         🤖  Multi-Agent AI Code Analyzer             ║
-║  Agents: Syntax · Optimization · Tests · Conflicts   ║
-╚══════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                   🤖  Multi-Agent AI Code Analyzer                             ║
+║  Agents: Syntax · Optimization · Tests · Conflicts . TEST_SCRIPT_WRITER_AGENT  ║
+╚════════════════════════════════════════════════════════════════════════════════╝
 Commands:  paste code → type END    |    exit / quit
 """
 
