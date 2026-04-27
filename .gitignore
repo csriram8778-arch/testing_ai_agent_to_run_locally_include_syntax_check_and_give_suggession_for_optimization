@@ -1,0 +1,105 @@
+# ===========================
+# SECRETS — NEVER COMMIT
+# ===========================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets.json
+
+# ===========================
+# PYTHON
+# ===========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+*.whl
+MANIFEST
+
+# ===========================
+# VIRTUAL ENVIRONMENTS
+# ===========================
+venv/
+env/
+ENV/
+.venv/
+.env/
+virtualenv/
+
+# ===========================
+# TESTING & COVERAGE
+# ===========================
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+nosetests.xml
+*.cover
+.hypothesis/
+
+# ===========================
+# IDEs & EDITORS
+# ===========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+*.sublime-project
+*.sublime-workspace
+
+# ===========================
+# OS FILES
+# ===========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ===========================
+# LOGS & TEMP FILES
+# ===========================
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# ===========================
+# NODE (if JS support added)
+# ===========================
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ===========================
+# JUPYTER NOTEBOOKS
+# ===========================
+.ipynb_checkpoints/
+*.ipynb
+
+# ===========================
+# DISTRIBUTION / PACKAGING
+# ===========================
+.cache/
+pip-wheel-metadata/
+share/python-wheels/
