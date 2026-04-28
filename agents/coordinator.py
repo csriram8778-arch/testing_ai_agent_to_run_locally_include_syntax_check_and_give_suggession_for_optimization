@@ -2,7 +2,8 @@ from agents.syntax_check_agent import SyntaxCheckAgent
 from agents.optimization_agent import OptimizationAgent
 from agents.unit_test_agent import UnitTestAgent
 from agents.merge_conflict_agent import MergeConflictAgent
-from agents.test_script_writer_agent import TestScriptWriterAgent   # ← NEW
+from agents.test_script_writer_agent import TestScriptWriterAgent
+from agents.cicd_pipeline_agent import CICDPipelineAgent
 from core.task_model import FinalOutput
 from core.output_formatter import format_task_assignment
 
@@ -18,6 +19,7 @@ class Coordinator:
       3. OPTIMIZATION_AGENT       (only if syntax clean)
       4. UNIT_TEST_AGENT          (only if syntax clean)
       5. TEST_SCRIPT_WRITER_AGENT (only if syntax clean)
+      6. CICD_PIPELINE_AGENT      (only if syntax clean)
     """
 
     def __init__(self):
@@ -26,6 +28,7 @@ class Coordinator:
         self.unit_test_agent    = UnitTestAgent()
         self.merge_agent        = MergeConflictAgent()
         self.test_writer_agent  = TestScriptWriterAgent()
+        self.cicd_agent         = CICDPipelineAgent()
 
     def _is_merge_conflict(self, code: str) -> bool:
         return "<<<<<<<" in code and "=======" in code
@@ -103,7 +106,7 @@ class Coordinator:
         else:
             output_lines.append(self._skipped(UnitTestAgent.NAME))
 
-        # Step 5: Full Test Script (NEW)
+        # Step 5: Full Test Script
         if not has_errors:
             self._print_assignment(
                 TestScriptWriterAgent.NAME,
@@ -119,6 +122,23 @@ class Coordinator:
             )
         else:
             output_lines.append(self._skipped(TestScriptWriterAgent.NAME))
+
+        # Step 6: CI/CD Pipeline
+        if not has_errors:
+            self._print_assignment(
+                CICDPipelineAgent.NAME,
+                "Check CI/CD readiness and generate GitHub Actions workflow",
+                user_input
+            )
+            cicd_result = self.cicd_agent.run(user_input)
+            output_lines.append(str(cicd_result))
+            final.changes.append("CI/CD pipeline config generated")
+            final.next_steps.append(
+                "Save generated YAML to .github/workflows/ci.yml "
+                "and push to trigger the pipeline"
+            )
+        else:
+            output_lines.append(self._skipped(CICDPipelineAgent.NAME))
 
         output_lines.append(str(final))
         return "\n".join(output_lines)

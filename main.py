@@ -8,16 +8,16 @@ Run:  python main.py
 import sys
 import os
 import argparse
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from agents.coordinator import Coordinator
 
-load_dotenv()
+#load_dotenv()
 
 
 BANNER = """
 ╔════════════════════════════════════════════════════════════════════════════════╗
 ║                   🤖  Multi-Agent AI Code Analyzer                             ║
-║  Agents: Syntax · Optimization · Tests · Conflicts . TEST_SCRIPT_WRITER_AGENT  ║
+║  Agents: Syntax · Optimization · Tests · Conflicts · TestWriter · CI/CD        ║
 ╚════════════════════════════════════════════════════════════════════════════════╝
 Commands:  paste code → type END    |    exit / quit
 """
