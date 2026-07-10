@@ -1,0 +1,13 @@
+{
+  "_comment": "Snippet for claude_desktop_config.json. Merge the 'harness' entry into your existing 'mcpServers' object. Claude Desktop's support for remote/HTTP MCP servers with custom headers has rolled out progressively across recent versions -- if your installed version does not yet support the 'url' + 'headers' form for a team HTTP-mode connection, use the local stdio form instead (single developer, their own token, not for shared team use) until you upgrade.",
+
+  "mcpServers": {
+    "harness": {
+      "type": "http",
+      "url": "https://<TEAM-INTERNAL-URL>.internal.example.com/",
+      "headers": {
+        "x-harness-api-key": "<YOUR-SCOPED-HARNESS-SAT>"
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+# Non-secret configuration only. Real secrets (Vault/AWS credentials are
+# implicit via IRSA/K8s-auth, not stored here at all; anything that IS a
+# secret -- e.g. AUDIT_WEBHOOK_SIGNING_SECRET_REF -- is a *reference* string,
+# not the secret value) flow in via the Secret resource created by your
+# secrets operator (e.g. External Secrets Operator), never committed here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harness-mcp-server-config
+  namespace: harness-mcp
+data:
+  MCP_MODE: "http"
+  HTTP_HOST: "0.0.0.0"
+  HTTP_PORT: "8443"
+  TLS_TERMINATED_UPSTREAM: "true"
+  HARNESS_AUTO_APPROVE_RISK: "none"
+  HARNESS_EDITION: "saas"
+  HARNESS_BASE_URL: "https://app.harness.io/"
+  SECRETS_BACKEND: "vault"
+  VAULT_AUTH_METHOD: "kubernetes"
+  VAULT_KV_MOUNT: "secret"
+  VAULT_KV_PATH_PREFIX: "harness-mcp-server"
+  CONFIRMATION_STORE_BACKEND: "redis"
+  CONFIRMATION_TTL_SECONDS: "300"
+  AUDIT_FAIL_CLOSED: "true"
+  AUDIT_LOCAL_FILE_PATH: "/var/log/harness-mcp/audit.jsonl"
+  AUDIT_S3_PREFIX: "harness-mcp-audit/"
+  LOG_LEVEL: "INFO"
+  METRICS_PORT: "9090"

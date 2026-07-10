@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harness-mcp-server
+  namespace: harness-mcp
+  labels:
+    app: harness-mcp-server
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: harness-mcp-server
+  template:
+    metadata:
+      labels:
+        app: harness-mcp-server
+    spec:
+      serviceAccountName: harness-mcp-server
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: harness-mcp-server
+          image: "<your-registry>/harness-mcp-server:<tag>"
+          imagePullPolicy: Always
+          ports:
+            - name: https
+              containerPort: 8443
+            - name: metrics
+              containerPort: 8443 # /metrics is served on the same app; split to a
+              # dedicated port only if your NetworkPolicy needs to
+              # distinguish scrape traffic from API traffic.
+          envFrom:
+            - configMapRef:
+                name: harness-mcp-server-config
+            - secretRef:
+                name: harness-mcp-server-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "256Mi" # memory limit == request: an auth-path service should
+              # never be OOM-throttled unpredictably
+          # Probe scheme matches the default TLS_TERMINATED_UPSTREAM=true
+          # posture: TLS/mTLS is terminated by a service-mesh sidecar or
+          # ingress in front of this pod, so the container's own listener
+          # (and the kubelet probe hitting it directly over the pod
+          # network) is plain HTTP -- this does not violate the "HTTPS/TLS
+          # only" requirement, which governs traffic that actually leaves
+          # the pod's trust boundary. If you instead set
+          # TLS_TERMINATED_UPSTREAM=false (the app terminates TLS itself
+          # via TLS_CERT_PATH/TLS_KEY_PATH), change every `scheme` below to
+          # HTTPS.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: https
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTP
+            periodSeconds: 5
+            failureThreshold: 12 # allow up to 60s for Vault warm-up before liveness kicks in
+          volumeMounts:
+            - name: audit-log
+              mountPath: /var/log/harness-mcp
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: audit-log
+          emptyDir:
+            sizeLimit: 512Mi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

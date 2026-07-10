@@ -1,0 +1,43 @@
+# Local development only. Do not use this compose file for anything
+# resembling production -- it terminates TLS nowhere and uses an env-var
+# token directly, which is fine for a laptop but violates the "zero
+# plaintext secrets" requirement for real deployments (use the Kubernetes
+# manifests under deploy/k8s/ with Vault/AWS Secrets Manager for that).
+services:
+  harness-mcp-server:
+    build: .
+    environment:
+      MCP_MODE: http
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 8443
+      TLS_TERMINATED_UPSTREAM: "true" # a local reverse proxy or `mkcert` setup should front this in dev too
+      HARNESS_AUTO_APPROVE_RISK: none
+      HARNESS_EDITION: saas
+      HARNESS_ACCOUNT_ID: ${HARNESS_ACCOUNT_ID}
+      HARNESS_BASE_URL: https://app.harness.io/
+      SECRETS_BACKEND: vault
+      VAULT_ADDR: http://vault-dev:8200
+      VAULT_AUTH_METHOD: token
+      VAULT_TOKEN: ${VAULT_DEV_ROOT_TOKEN:-root}
+      CONFIRMATION_STORE_BACKEND: memory
+      AUDIT_FAIL_CLOSED: "true"
+      AUDIT_LOCAL_FILE_PATH: /var/log/harness-mcp/audit.jsonl
+      LOG_LEVEL: DEBUG
+    ports:
+      - "8443:8443"
+    depends_on:
+      - vault-dev
+    read_only: true
+    tmpfs:
+      - /var/log/harness-mcp
+    security_opt:
+      - no-new-privileges:true
+
+  vault-dev:
+    image: hashicorp/vault:1.17
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN:-root}
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK

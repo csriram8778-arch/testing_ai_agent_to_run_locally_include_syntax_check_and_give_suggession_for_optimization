@@ -1,0 +1,31 @@
+{
+  "_comment": "Snippet for ~/.claude.json (or a project-level .mcp.json). Merge the 'harness' entry into your existing 'mcpServers' object -- do not overwrite the whole file. Two examples are shown; use ONE per environment, not both under the same name.",
+
+  "mcpServers": {
+    "harness": {
+      "_comment": "Team HTTP mode (recommended): the server holds zero credentials. Replace <TEAM-INTERNAL-URL> with your VPC-internal HTTPS endpoint and <YOUR-SCOPED-HARNESS-SAT> with YOUR OWN Harness Service Account Token (or personal-identity-scoped token) -- never a shared team credential.",
+      "type": "http",
+      "url": "https://<TEAM-INTERNAL-URL>.internal.example.com/",
+      "headers": {
+        "x-harness-api-key": "<YOUR-SCOPED-HARNESS-SAT>"
+      }
+    },
+
+    "harness-local-stdio": {
+      "_comment": "Local/dev single-user mode only -- NOT for shared team use, since it runs under one developer's own token. See harness-mcp-server/README.md 'Onboarding'.",
+      "command": "python",
+      "args": ["-m", "harness_mcp"],
+      "env": {
+        "MCP_MODE": "stdio",
+        "HARNESS_AUTO_APPROVE_RISK": "none",
+        "HARNESS_ACCOUNT_ID": "<your-harness-account-id>",
+        "HARNESS_BASE_URL": "https://app.harness.io/",
+        "SECRETS_BACKEND": "vault",
+        "VAULT_ADDR": "https://vault.internal.example.com:8200",
+        "VAULT_AUTH_METHOD": "token",
+        "VAULT_TOKEN": "<dev-only-vault-token>",
+        "HARNESS_SAT_TOKEN": "<your-own-scoped-harness-service-account-token>"
+      }
+    }
+  }
+}

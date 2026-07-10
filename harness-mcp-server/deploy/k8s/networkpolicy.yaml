@@ -1,0 +1,59 @@
+# Default-deny ingress/egress, with explicit exceptions. NOTE: vanilla
+# Kubernetes NetworkPolicy (the "networking.k8s.io/v1" API used here) can
+# only select egress destinations by IP block, namespace, or pod selector --
+# it CANNOT match by FQDN. Restricting egress to the Harness API host by
+# hostname (as this policy's intent requires) needs either:
+#   (a) a CNI that supports FQDN-based policies (e.g. Cilium CiliumNetworkPolicy
+#       with `toFQDNs`), or
+#   (b) routing egress through a forward proxy / egress gateway that you
+#       control by hostname, with this NetworkPolicy restricting egress to
+#       just that proxy's IP.
+# The ipBlock entries below are placeholders and MUST be replaced with your
+# actual, current Harness/Vault/S3/Redis/SIEM egress targets (or, better,
+# swapped for one of the two approaches above) before this is enforced.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: harness-mcp-server
+  namespace: harness-mcp
+spec:
+  podSelector:
+    matchLabels:
+      app: harness-mcp-server
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              purpose: internal-gateway
+      ports:
+        - protocol: TCP
+          port: 8443
+    - from:
+        - namespaceSelector: {} # cluster-internal Prometheus scraping /metrics
+      ports:
+        - protocol: TCP
+          port: 8443
+  egress:
+    # cluster DNS
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Harness API, Vault, S3/AWS Secrets Manager, Redis, SIEM webhook --
+    # placeholder CIDRs, replace per the note above.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0 # REPLACE: scope to Harness/Vault/AWS/Redis/SIEM ranges
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8200 # Vault
+        - protocol: TCP
+          port: 6379 # Redis (prefer 6380/TLS in prod)

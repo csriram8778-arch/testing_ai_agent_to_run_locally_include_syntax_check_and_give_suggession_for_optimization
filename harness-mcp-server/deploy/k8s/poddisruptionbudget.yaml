@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: harness-mcp-server
+  namespace: harness-mcp
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: harness-mcp-server
